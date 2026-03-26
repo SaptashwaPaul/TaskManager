@@ -132,6 +132,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Urls.Add("http://0.0.0.0:8080");
+
 app.Run();
 
 /*
