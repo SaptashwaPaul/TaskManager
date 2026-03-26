@@ -138,3 +138,10 @@ C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net8.0
 C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net8.0\TaskManager.API.pdb
 C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net8.0\TaskManager.API.genruntimeconfig.cache
 C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net8.0\ref\TaskManager.API.dll
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\web.config
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\appsettings.Development.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\appsettings.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\TaskManager.API.deps.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\TaskManager.API.runtimeconfig.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\bin\Debug\net8.0\out\TaskManager.API.staticwebassets.endpoints.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net8.0\TaskManager.API.sourcelink.json
