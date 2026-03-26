@@ -1,0 +1,8 @@
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.csproj.AssemblyReference.cache
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.AssemblyInfoInputs.cache
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.AssemblyInfo.cs
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.csproj.CoreCompileInputs.cache
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Saptashwa\source\repos\TaskManager.API\TaskManager.API\obj\Debug\net10.0\TaskManager.API.MvcApplicationPartsAssemblyInfo.cache
