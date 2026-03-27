@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System;
@@ -50,13 +51,14 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-// Database
+// Database (Render: link Postgres so DATABASE_URL uses the internal host, or set ConnectionStrings__DefaultConnection to Internal Database URL)
 
-/* builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));*/
+var postgresConnection = ResolvePostgresConnectionString(builder.Configuration);
+if (string.IsNullOrWhiteSpace(postgresConnection))
+    throw new InvalidOperationException("PostgreSQL connection missing: set ConnectionStrings:DefaultConnection or DATABASE_URL (e.g. from Render linked DB).");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(postgresConnection));
 
 
 // Dependency Injection
@@ -137,7 +139,7 @@ app.Urls.Add("http://0.0.0.0:8080");
 
 app.Run();
 
-/*
+ /*
  {
   "name": "Admin User",
   "email": "admin@test.com",
@@ -145,3 +147,54 @@ app.Run();
   "roleId": 1
  }
  */
+
+static string? ResolvePostgresConnectionString(IConfiguration configuration)
+{
+    var configured = configuration.GetConnectionString("DefaultConnection")?.Trim().Trim('"');
+    if (!string.IsNullOrWhiteSpace(configured))
+    {
+        if (IsPostgresUri(configured))
+            return ConvertDatabaseUrlToNpgsql(configured);
+        return configured;
+    }
+
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")?.Trim().Trim('"');
+    return string.IsNullOrWhiteSpace(databaseUrl) ? null : ConvertDatabaseUrlToNpgsql(databaseUrl);
+}
+
+static bool IsPostgresUri(string s) =>
+    s.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+    || s.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase);
+
+static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo;
+    var colonIndex = userInfo.IndexOf(':');
+    var username = colonIndex >= 0
+        ? Uri.UnescapeDataString(userInfo[..colonIndex])
+        : Uri.UnescapeDataString(userInfo);
+    var password = colonIndex >= 0
+        ? Uri.UnescapeDataString(userInfo[(colonIndex + 1)..])
+        : string.Empty;
+
+    var database = uri.AbsolutePath.TrimStart('/');
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
+    var csb = new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = port,
+        Database = database,
+        Username = username,
+        Password = password
+    };
+
+    // Render internal hostname (linked DB) — avoid public IPv6 endpoints from inside Docker.
+    if (uri.Host.EndsWith(".render.internal", StringComparison.OrdinalIgnoreCase))
+        csb.SslMode = SslMode.Prefer;
+    else
+        csb.SslMode = SslMode.Require;
+
+    return csb.ConnectionString;
+}
