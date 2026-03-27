@@ -135,7 +135,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Urls.Add("http://0.0.0.0:8080");
+// Render (and similar hosts) set PORT; the edge proxy forwards to that port, not a hardcoded 8080.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port) && int.TryParse(port, out var listenPort))
+    app.Urls.Add($"http://0.0.0.0:{listenPort}");
+else
+    app.Urls.Add("http://0.0.0.0:8080");
 
 app.Run();
 

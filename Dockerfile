@@ -10,7 +10,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
+# Render assigns PORT at runtime; Kestrel URLs are set in Program.cs from PORT (fallback 8080 local).
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
 
 ENTRYPOINT ["dotnet", "TaskManager.API.dll"]
