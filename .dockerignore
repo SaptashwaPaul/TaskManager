@@ -1,0 +1,7 @@
+**/.git
+**/.vs
+**/.github
+**/bin
+**/obj
+**/out
+**/pub_test
