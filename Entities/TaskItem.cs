@@ -20,5 +20,11 @@
         public DateTime DueDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        
+        // Constructor to ensure UTC dates
+        public TaskItem()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }

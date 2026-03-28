@@ -3,6 +3,7 @@ using TaskManager.API.Data;
 using TaskManager.API.DTOs.Tasks;
 using TaskManager.API.Entities;
 using TaskManager.API.Interfaces;
+using TaskManager.API.Helpers;
 
 namespace TaskManager.API.Services
 {
@@ -35,7 +36,7 @@ namespace TaskManager.API.Services
                 Description = dto.Description,
                 AssignedToUserId = dto.AssignedToUserId,
                 CreatedByUserId = userId,
-                DueDate = dto.DueDate,
+                DueDate = DateTimeHelper.ToUtc(dto.DueDate),
                 Priority = dto.Priority.Trim().ToLower() switch
                 {
                     "high" => "High",
@@ -110,7 +111,7 @@ namespace TaskManager.API.Services
                 throw new ArgumentException("Invalid status");
 
             task.StatusId = statusId;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTimeHelper.ToUtc(DateTime.UtcNow);
 
             await _context.SaveChangesAsync();
 
