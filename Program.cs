@@ -57,6 +57,10 @@ var postgresConnection = ResolvePostgresConnectionString(builder.Configuration);
 if (string.IsNullOrWhiteSpace(postgresConnection))
     throw new InvalidOperationException("PostgreSQL connection missing: set ConnectionStrings:DefaultConnection or DATABASE_URL (e.g. from Render linked DB).");
 
+// Log connection details for debugging (without sensitive data)
+var connectionBuilder = new NpgsqlConnectionStringBuilder(postgresConnection);
+Console.WriteLine($"Connecting to PostgreSQL at: {connectionBuilder.Host}:{connectionBuilder.Port}, Database: {connectionBuilder.Database}, SSL Mode: {connectionBuilder.SslMode}");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(postgresConnection));
 
@@ -195,11 +199,15 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
         Password = password
     };
 
-    // Render internal hostname (linked DB) — avoid public IPv6 endpoints from inside Docker.
+    // Render internal hostname (linked DB) — use internal connection and disable SSL
     if (uri.Host.EndsWith(".render.internal", StringComparison.OrdinalIgnoreCase))
-        csb.SslMode = SslMode.Prefer;
+    {
+        csb.SslMode = SslMode.Disable;
+    }
     else
+    {
         csb.SslMode = SslMode.Require;
+    }
 
     return csb.ConnectionString;
 }
