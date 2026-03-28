@@ -211,8 +211,24 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
         csb.SslMode = SslMode.Require;
         csb.CommandTimeout = 30;
         csb.Timeout = 15;
-        // Force IPv4 for Supabase to avoid IPv6 connectivity issues in Docker
-        csb.Host = GetIPv4Host(uri.Host);
+        
+        // Check if using pooler (which has IPv4)
+        if (uri.Host.Contains("-pooler.supabase.co") || uri.AbsolutePath.Contains("/pg"))
+        {
+            Console.WriteLine($"Supabase pooler detected: {uri.Host}");
+            // Pooler settings
+            csb.MaxPoolSize = 1; // Pooler already manages connections
+            csb.MinPoolSize = 1;
+        }
+        else
+        {
+            Console.WriteLine($"Supabase direct detected, keeping original host: {uri.Host}");
+            // Direct connection settings
+            csb.MaxPoolSize = 10;
+            csb.MinPoolSize = 1;
+            csb.ConnectionIdleLifetime = 300;
+            csb.ConnectionPruningInterval = 10;
+        }
     }
     else
     {
@@ -221,35 +237,4 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
     }
 
     return csb.ConnectionString;
-}
-
-static string GetIPv4Host(string host)
-{
-    try
-    {
-        Console.WriteLine($"Resolving host: {host}");
-        var addresses = System.Net.Dns.GetHostAddresses(host);
-        
-        // Log all addresses for debugging
-        foreach (var addr in addresses)
-        {
-            Console.WriteLine($"Found address: {addr} (Family: {addr.AddressFamily})");
-        }
-        
-        // Try to get IPv4 address
-        var ipv4Address = addresses.FirstOrDefault(addr => addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-        if (ipv4Address != null)
-        {
-            Console.WriteLine($"Using IPv4 address: {ipv4Address}");
-            return ipv4Address.ToString();
-        }
-        
-        Console.WriteLine($"No IPv4 address found, using original host: {host}");
-        return host;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"DNS resolution failed for {host}: {ex.Message}");
-        return host; // Fallback to original host if DNS resolution fails
-    }
 }
