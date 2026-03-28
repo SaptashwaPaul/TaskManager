@@ -160,6 +160,8 @@ app.Run();
 static string? ResolvePostgresConnectionString(IConfiguration configuration)
 {
     var configured = configuration.GetConnectionString("DefaultConnection")?.Trim().Trim('"');
+    Console.WriteLine($"Raw connection string from config: {configured}");
+    
     if (!string.IsNullOrWhiteSpace(configured))
     {
         if (IsPostgresUri(configured))
@@ -168,6 +170,7 @@ static string? ResolvePostgresConnectionString(IConfiguration configuration)
     }
 
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")?.Trim().Trim('"');
+    Console.WriteLine($"DATABASE_URL from env: {databaseUrl}");
     return string.IsNullOrWhiteSpace(databaseUrl) ? null : ConvertDatabaseUrlToNpgsql(databaseUrl);
 }
 
@@ -205,7 +208,7 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
         // Render internal database
         csb.SslMode = SslMode.Disable;
     }
-    else if (uri.Host.Contains("supabase.co", StringComparison.OrdinalIgnoreCase))
+    else if (uri.Host.Contains("supabase.co", StringComparison.OrdinalIgnoreCase) || uri.Host.Contains("supabase.com", StringComparison.OrdinalIgnoreCase))
     {
         // Supabase database - use SSL and specific settings
         csb.SslMode = SslMode.Require;
@@ -213,7 +216,7 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
         csb.Timeout = 15;
         
         // Check if using pooler (which has IPv4)
-        if (uri.Host.Contains("-pooler.supabase.co") || uri.AbsolutePath.Contains("/pg"))
+        if (uri.Host.Contains("-pooler.supabase.co") || uri.Host.Contains("-pooler.supabase.com") || uri.AbsolutePath.Contains("/pg"))
         {
             Console.WriteLine($"Supabase pooler detected: {uri.Host}");
             // Pooler settings
