@@ -199,15 +199,38 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
         Password = password
     };
 
-    // Render internal hostname (linked DB) — use internal connection and disable SSL
+    // Handle different database providers
     if (uri.Host.EndsWith(".render.internal", StringComparison.OrdinalIgnoreCase))
     {
+        // Render internal database
         csb.SslMode = SslMode.Disable;
+    }
+    else if (uri.Host.Contains("supabase.co", StringComparison.OrdinalIgnoreCase))
+    {
+        // Supabase database - use SSL and specific settings
+        csb.SslMode = SslMode.Require;
+        // Force IPv4 for Supabase to avoid IPv6 connectivity issues in Docker
+        csb.Host = GetIPv4Host(uri.Host);
     }
     else
     {
+        // Other external databases
         csb.SslMode = SslMode.Require;
     }
 
     return csb.ConnectionString;
+}
+
+static string GetIPv4Host(string host)
+{
+    try
+    {
+        var addresses = System.Net.Dns.GetHostAddresses(host);
+        var ipv4Address = addresses.FirstOrDefault(addr => addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+        return ipv4Address?.ToString() ?? host;
+    }
+    catch
+    {
+        return host; // Fallback to original host if DNS resolution fails
+    }
 }
