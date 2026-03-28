@@ -110,11 +110,13 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("https://task-manager-ui-zeta.vercel.app")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
 });
 
 builder.Services.AddHttpClient<GeminiService>();
@@ -122,7 +124,7 @@ builder.Services.AddScoped<GeminiService>();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 
 // Middleware pipeline
@@ -145,6 +147,8 @@ if (!string.IsNullOrEmpty(port) && int.TryParse(port, out var listenPort))
     app.Urls.Add($"http://0.0.0.0:{listenPort}");
 else
     app.Urls.Add("http://0.0.0.0:8080");
+
+app.MapMethods("{*path}", new[] { "OPTIONS" }, () => Results.Ok());
 
 app.Run();
 
