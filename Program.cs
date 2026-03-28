@@ -209,6 +209,8 @@ static string ConvertDatabaseUrlToNpgsql(string databaseUrl)
     {
         // Supabase database - use SSL and specific settings
         csb.SslMode = SslMode.Require;
+        csb.CommandTimeout = 30;
+        csb.Timeout = 15;
         // Force IPv4 for Supabase to avoid IPv6 connectivity issues in Docker
         csb.Host = GetIPv4Host(uri.Host);
     }
@@ -225,12 +227,29 @@ static string GetIPv4Host(string host)
 {
     try
     {
+        Console.WriteLine($"Resolving host: {host}");
         var addresses = System.Net.Dns.GetHostAddresses(host);
+        
+        // Log all addresses for debugging
+        foreach (var addr in addresses)
+        {
+            Console.WriteLine($"Found address: {addr} (Family: {addr.AddressFamily})");
+        }
+        
+        // Try to get IPv4 address
         var ipv4Address = addresses.FirstOrDefault(addr => addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-        return ipv4Address?.ToString() ?? host;
+        if (ipv4Address != null)
+        {
+            Console.WriteLine($"Using IPv4 address: {ipv4Address}");
+            return ipv4Address.ToString();
+        }
+        
+        Console.WriteLine($"No IPv4 address found, using original host: {host}");
+        return host;
     }
-    catch
+    catch (Exception ex)
     {
+        Console.WriteLine($"DNS resolution failed for {host}: {ex.Message}");
         return host; // Fallback to original host if DNS resolution fails
     }
 }
